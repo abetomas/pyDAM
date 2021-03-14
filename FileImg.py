@@ -16,7 +16,14 @@ optional arguments:
   -h, --help   show this help message and exit
   -log         Display log of actions done on each image file
 
+This file utility uses Phil Harvey's excellent 'exiftool' application (https://exiftool.org) 
+through the pyExifTool wrapper of Sven Marnach (https://smarnach.github.io/pyexiftool/)
+
+written by: 
+Abe Tomas, March 2021
+
 """
+
 import os
 import subprocess
 import time
