@@ -30,7 +30,6 @@ import time
 from datetime import timedelta
 import sys
 import argparse
-# import datetime
 import re
 import exiftool
 
