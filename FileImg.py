@@ -128,10 +128,6 @@ def get_dirlist(rootdir):
     return filelist
 
 def process_file (f):
-    """
-    global FromDir, ToDir
-    global loglist, duplist
-    """
     global addctr, dupctr, dupdctr, dupnctr, ignctr, allctr, imgctr, nddctr, ndactr, ndtctr
     with exiftool.ExifTool() as et:
         # print (f)
@@ -177,9 +173,8 @@ def process_file (f):
             ndtctr += 1
 
 def print_stats():
-
-    # global addctr, dupctr, dupdctr, dupnctr, ignctr, allctr, imgctr, nddctr, ndactr, ndtctr
     if dupctr:
+        # there are duplicates that must be listed
         print ('\n***** Duplicates *****')
         for d in duplist:
             print (d)
