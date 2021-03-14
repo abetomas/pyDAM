@@ -207,8 +207,8 @@ if __name__ == "__main__":
     parser.add_argument('DESTINATION',type=str,help='Destination folder of images')
     parser.add_argument('-log',action='store_true',help='Display log of actions done on each image file')    
     args = parser.parse_args()
-    FromDir=args.source
-    ToDir=args.destination
+    FromDir=args.SOURCE
+    ToDir=args.DESTINATION
     PrintLog=args.log
 
     main()
