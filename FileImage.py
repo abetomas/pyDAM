@@ -111,7 +111,6 @@ def get_dirlist(rootdir):
     dirlist = []
     with os.scandir(rootdir) as rit:
         for entry in rit:
-
             if not entry.name.startswith('.') and entry.is_file():
                 head, tail = os.path.split(entry.path)
                 allctr += 1
