@@ -1,4 +1,4 @@
-# FileImg.py
+# FileImage.py
 """
 usage: FileImage.py [-h] [-log] SOURCE DESTINATION
 
