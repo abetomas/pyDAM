@@ -22,7 +22,6 @@ and the pyExifTool wrapper of Sven Marnach (https://smarnach.github.io/pyexiftoo
 
 written by: 
 Abe Tomas, March 2021
-
 """
 
 import os
@@ -35,9 +34,8 @@ import argparse
 import re
 import exiftool
 
-# Global variables
+# image filetypes
 ftype = '.HEIC$|.JPG$|.JPEG$|.ARW$|.DNG$|.m4v$|.NEF$|.MOV$|.MP4$|.TIFF$|.PNG$'
-# ftype='.JPG$|.m4v$|.NEF$|.MOV$'
 
 global addctr, dupctr, dupdctr, dupnctr, ignctr, allctr, imgctr, nddctr, ndactr, ndtctr
 ignctr = 0
@@ -53,7 +51,6 @@ ndtctr = 0
 filelist = []
 ShowLog = False
 
-# def main(fromfolder='?', tofolder='?', log='y'):
 def main():
 
     global FromDir, ToDir, ShowLog # from args
@@ -79,12 +76,12 @@ def main():
         os.makedirs(ToDir + '/No-Capture-Date')
 
     # retrieve *all image filenames  
-    # flist=get_dirlist(FromDir)
     get_dirlist(FromDir)
 
     print_stats()
 
 def GetFolders (FromDir, ToDir):
+  
     ok=False
     while not ok:
         # future: handle embeddded spaces in folder names
@@ -103,11 +100,11 @@ def GetFolders (FromDir, ToDir):
                 print("'Q'uit accepted, ... goodbye .....\n")
                 os._exit(1)
     if not os.path.exists(ToDir):
-        os.makedirs(ToDir)
-    
+        os.makedirs(ToDir)   
     return (FromDir, ToDir)
 
 def get_dirlist(rootdir):
+  
     # traverse directory tree and retrieve all image filenames
     global imgctr, ignctr, allctr
 
@@ -129,7 +126,6 @@ def get_dirlist(rootdir):
             if not entry.name.startswith('.') and entry.is_dir():
                 dirlist.append(entry.path)
                 dirlist += get_dirlist(entry.path)
-
     return filelist
 
 def process_file (f):
@@ -223,7 +219,6 @@ def get_parms ():
 def logger (action):
 
     global logfile, ShowLog
-
     action=(str(allctr) + '. ' + action)
     if ShowLog:
         print(action)
