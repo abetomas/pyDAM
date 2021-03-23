@@ -1,6 +1,6 @@
 # FileImg.py
 """
-usage: FileImg.py [-h] [-log] SOURCE DESTINATION
+usage: FileImage.py [-h] [-log] SOURCE DESTINATION
 
 Organize image files by capture date.
   This utility retrieves all image files from [SOURCE] folder directory and it's sub-directories.
@@ -18,7 +18,7 @@ optional arguments:
   -log         Display log of actions done on each image file
 
 This file utility uses Phil Harvey's excellent 'exiftool' application (https://exiftool.org) 
-through the pyExifTool wrapper of Sven Marnach (https://smarnach.github.io/pyexiftool/)
+and the pyExifTool wrapper of Sven Marnach (https://smarnach.github.io/pyexiftool/)
 
 written by: 
 Abe Tomas, March 2021
