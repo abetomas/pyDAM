@@ -114,14 +114,13 @@ def get_dirlist(rootdir):
     dirlist = []
     with os.scandir(rootdir) as rit:
         for entry in rit:
-
             if not entry.name.startswith('.') and entry.is_file():
                 head, tail = os.path.split(entry.path)
                 allctr += 1
                 if (re.search(ftype,tail,re.IGNORECASE)):
+                    imgctr += 1
                     filelist.append(entry.path)
                     process_file(entry.path)
-                    imgctr += 1
                 else:
                     # not a valid image filetype      
                     ignctr += 1
