@@ -50,11 +50,12 @@ ndactr = 0
 ndtctr = 0
 filelist = []
 ShowLog = False
+ShowCtr = False
 
 def main():
 
     global FromDir, ToDir, ShowLog # from args
-    global logfile
+    global logfile, ShowCtr
     FromDir, ToDir = GetFolders(FromDir, ToDir)
 
     print ('\n'+ sys.argv[0] + ' ..... processing .....')
@@ -68,9 +69,11 @@ def main():
     head, tail = os.path.split(sys.argv[0])
     logfile = ToDir + '/' + tail + '_' + dtstamp + '.log'
 
-    subprocess.run(['echo "' + tail + ' logfile (' + logfile + ')" >> ' + logfile], shell=True)
-    subprocess.run(['echo "**********" >> ' + logfile], shell=True)
-    
+    logger('**********')    
+    logger(tail + ' logfile(' + logfile + ')')
+    logger('**********')
+    ShowCtr = True
+
     # create folder for files with no-capture-date
     if not os.path.exists(ToDir + '/No-Capture-Date'):
         os.makedirs(ToDir + '/No-Capture-Date')
@@ -173,6 +176,19 @@ def process_file (f):
 
 def print_stats():
 
+    global ShowCtr
+    ShowCtr = False
+    logger('**********')
+    logger('Source:      ' + FromDir)
+    logger('Destination: ' + ToDir)
+    logger('Logfile:     ' + logfile)
+    logger(' ')    
+    logger('All Files=' + str(allctr))    
+    logger('- Added=' + str(addctr))
+    logger('- Duplicates=' + str(dupctr) + ': Same-Date=' + str(dupdctr) + ' Same-File-Name=' + str(dupnctr))
+    logger('- No-Capture-Date=' + str(ndtctr) + ': Added=' + str(ndactr) + ' Same-File-Name=' + str(nddctr))
+    logger('Ignored=' + str(ignctr))
+
     print (
         "\nSource:      " + FromDir
         ,"\nDestination: " + ToDir
@@ -193,8 +209,13 @@ def print_stats():
 
     if dupctr:
         # there are duplicates that must be listed
+        logger(' ')      
+        logger('*** Warning - DUPLICATES FOUND!')     
+        logger('    please >>> grep ''DUP'' ' + logfile + ' <<< for duplicated files') 
+               
         print ("\n*** Warning - DUPLICATES FOUND!"
             ,"\n    please >>> grep 'DUP' " + logfile + " <<< for duplicated files")
+        
 
 def get_parms ():
 
@@ -218,8 +239,9 @@ def get_parms ():
 
 def logger (action):
 
-    global logfile, ShowLog
-    action=(str(allctr) + '. ' + action)
+    global logfile, ShowLog, ShowCtr
+    if ShowCtr:
+        action=(str(allctr) + '. ' + action)
     if ShowLog:
         print(action)
     subprocess.run(['echo "' + action +  '" >> ' + logfile], shell=True)
@@ -234,5 +256,12 @@ if __name__ == "__main__":
     main()
 
     end_time = time.monotonic()
-    print('\nElapsed Time: ',timedelta(seconds=end_time - start_time))
-    print ('***** Done! *****\n') 
+
+    elapsed=str(timedelta(seconds=end_time - start_time))
+    logger(' ')
+    logger('Elapsed Time: ' + elapsed)      
+    logger('*** Done! ***')   
+    logger(' ')
+
+    print('\nElapsed Time: ',elapsed)
+    print ('*** Done! ***\n') 
