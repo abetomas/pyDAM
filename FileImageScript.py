@@ -3,15 +3,11 @@
 usage: FileImage.py [-h] [-log] SOURCE DESTINATION
 
 Organize image files by capture date.
-- This utility retrieves all image files from [SOURCE] folder directory and it's sub-directories.
-- Image files are moved to [DESTINATION] folders based on image capture date and organized into YYYY/YYYY-MM-DD folders.
-- Duplicated files will not be moved to the new folders.
-- Files with no image capture date are stored in the folder [DESTINATION]/No-Capture-Date.
-- The action done on each file is recorded in a logfile.
-
-Note: 
-- This python program only works on non-NAS files.
-- see amended version of this program 'FileImageScript.py' which generates a shell script for copying files on NAS folders.
+  This utility retrieves all image files from [SOURCE] folder directory and it's sub-directories.
+  Image files are moved to [DESTINATION] folders based on image capture date and organized into YYYY/YYYY-MM-DD folders.
+  Duplicated files will not be moved to the new folders.
+  Files with no image capture date are stored in the folder [DESTINATION]/No-Capture-Date.
+  The action done on each file is recorded in a logfile.
 
 positional arguments:
   SOURCE       Source folder of images
