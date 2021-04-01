@@ -1,0 +1,35 @@
+**********
+fileimagescript.py logfile(./fileimagescript.py_20210331-202939.log)
+**********
+1. IGNORED ***  : ./test/cp-preserve.txt
+2. ADDED        : ./test/IMG_0095.HEIC +> ./tmp/2019/2019-02-09/IMG_0095.HEIC
+3. ADDED        : ./test/IMG_7937.HEIC +> ./tmp/2021/2021-01-23/IMG_7937.HEIC
+4. ADDED        : ./test/IMG_7937a.HEIC +> ./tmp/2021/2021-01-23/IMG_7937a.HEIC
+5. IGNORED ***  : ./test/README.md
+6. IGNORED ***  : ./test/stackovrflw-post
+7. ADDED        : ./test/subdir-1/IMG_0047.dng +> ./tmp/2019/2019-01-27/IMG_0047.dng
+8. ADDED        : ./test/subdir-1/IMG_0613.m4v +> ./tmp/2019/2019-09-05/IMG_0613.m4v
+9. ADDED        : ./test/subdir-1/IMG_2646.jpg +> ./tmp/2017/2017-09-11/IMG_2646.jpg
+10. NO-DATE ADD  : ./test/subdir-1/IMG_4445.PNG +> ./tmp/No-Capture-Date/IMG_4445.PNG
+11. ADDED        : ./test/subdir-1/IMG_4449.MOV +> ./tmp/2020/2020-02-11/IMG_4449.MOV
+12. IGNORED ***  : ./test/subdir-1/README.md
+13. ADDED        : ./test/subdir-2/20170414_184453.jpg +> ./tmp/2017/2017-04-14/20170414_184453.jpg
+14. ADDED        : ./test/subdir-2/20170414_184515.jpg +> ./tmp/2017/2017-04-14/20170414_184515.jpg
+15. ADDED        : ./test/subdir-2/IMG_2646.jpg +> ./tmp/2017/2017-09-11/IMG_2646.jpg
+16. IGNORED ***  : ./test/test-2/README.md
+17. IGNORED ***  : ./test/test-2/regex.py
+18. IGNORED ***  : ./test/test-2/stackovrflw-post
+**********
+Source:      ./test
+Destination: ./tmp
+Logfile:     ./fileimagescript.py_20210331-202939.log
+cp script:   ./fileimagescript.py_20210331-202939_cp.sh
+ 
+All Files=18
+- With-Capture-Date=10
+- Without-Capture-Date=1
+Ignored=7
+ 
+Elapsed Time: 0:00:05.802262
+*** Done! ***
+ 
