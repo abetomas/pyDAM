@@ -3,11 +3,17 @@
 usage: FileImage.py [-h] [-log] SOURCE DESTINATION
 
 Organize image files by capture date.
-  This utility retrieves all image files from [SOURCE] folder directory and it's sub-directories.
-  Image files are moved to [DESTINATION] folders based on image capture date and organized into YYYY/YYYY-MM-DD folders.
-  Duplicated files will not be moved to the new folders.
+  
+  File utility to retrieve all image files from [SOURCE] directory and it's sub-directories.
+  Generate a shell script for copying files to destination folders based on image capture date.
+  Image files are organized into YYYY/YYYY-MM-DD folders.
   Files with no image capture date are stored in the folder [DESTINATION]/No-Capture-Date.
   The action done on each file is recorded in a logfile.
+  Note:
+  - The generated shell script (a kludge!) is intended to be executed within the NAS server, 
+    this will bypass date-stamp issues on 'cp -p' flag when copying files on a WD MyCloud 
+    EX2 Ultra NAS server from a MacOS Terminal.
+  - See previous version 'FileImage.py' which actually copies files to destination folders.
 
 positional arguments:
   SOURCE       Source folder of images
@@ -55,19 +61,22 @@ ShowCtr = False
 def main():
 
     global FromDir, ToDir, ShowLog # from args
-    global logfile, ShowCtr
+    global logfile, copyscript, ShowCtr
     FromDir, ToDir = GetFolders(FromDir, ToDir)
 
     print ('\n'+ sys.argv[0] + ' ..... processing .....')
 
-    if not os.path.exists(ToDir):
-        os.makedirs(ToDir)
-        print('**> Destination folder ' + ToDir + ' created.')
-
     # create logfile [progname_yyyymmd-hhmmss.log]
     dtstamp=datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
     head, tail = os.path.split(sys.argv[0])
-    logfile = ToDir + '/' + tail + '_' + dtstamp + '.log'
+
+    logfile = './' + tail + '_' + dtstamp + '.log'
+    copyscript = './' + tail + '_' + dtstamp + '_cp.sh'    
+
+    scripto('mkdir -v ' + ToDir)      
+    if not os.path.exists(ToDir):
+        os.makedirs(ToDir)
+        print('**> Destination folder ' + ToDir + ' created.')
 
     logger('**********')    
     logger(tail + ' logfile(' + logfile + ')')
@@ -75,6 +84,7 @@ def main():
     ShowCtr = True
 
     # create folder for files with no-capture-date
+    scripto('mkdir -v ' + ToDir + '/No-Capture-Date')                 
     if not os.path.exists(ToDir + '/No-Capture-Date'):
         os.makedirs(ToDir + '/No-Capture-Date')
 
@@ -134,7 +144,7 @@ def process_file (f):
 
     global addctr, dupctr, dupdctr, dupnctr, ignctr, allctr, imgctr, nddctr, ndactr, ndtctr
     with exiftool.ExifTool() as et:
-        # print (f)
+
         # CaptureDate = et.get_tag('EXIF:DateTimeOriginal', f)
         CreateDate = et.get_tag('CreateDate', f)
         head, tail = os.path.split(f)
@@ -144,32 +154,18 @@ def process_file (f):
             # create directories based on creation dates
             if not os.path.exists(ToDir + '/' + OrigYYYY):
                 os.makedirs(ToDir + '/' + OrigYYYY)
+                scripto('mkdir -v ' + ToDir + '/' + OrigYYYY)                     
             if not os.path.exists(ToDir + '/' + OrigYYYY + '/' + CaptureDate):
                 os.makedirs(ToDir + '/' + OrigYYYY + '/' + CaptureDate)
-
+                scripto('mkdir -v ' + ToDir + '/' + OrigYYYY + '/' + CaptureDate)      
             # copy -noclobber file to destination
-            if os.path.isfile(ToDir + '/' + OrigYYYY + '/' + CaptureDate + '/' + tail):
-                # file exists, therefore it's a duplicate
-                dupctr += 1                
-                if CreateDate == et.get_tag('CreateDate', (ToDir + '/' + OrigYYYY + '/' + CaptureDate + '/' + tail)):             
-                    dupdctr += 1
-                    logger('DUP FILE+DATE: ' + f + ' == ' + ToDir + '/' + OrigYYYY + '/' + CaptureDate + '/' + tail)
-                else:
-                    dupnctr += 1                    
-                    logger('DUP FILENAME : ' + f + ' == ' + ToDir + '/' + OrigYYYY + '/' + CaptureDate + '/' + tail)
-            else: 
-                addctr += 1
-                logger('ADDED        : ' + f + ' +> ' + ToDir + '/' + OrigYYYY + '/' + CaptureDate + '/' + tail)
-                subprocess.run(['cp', '-pn', f, ToDir + '/' + OrigYYYY + '/' + CaptureDate]) 
+            addctr += 1                 
+            scripto('cp -pnv ' + f + ' ' + ToDir + '/' + OrigYYYY + '/' + CaptureDate) 
+            logger('ADDED        : ' + f + ' +> ' + ToDir + '/' + OrigYYYY + '/' + CaptureDate + '/' + tail)                                
         else:   
             ndtctr += 1              
-            if os.path.isfile(ToDir + '/No-Capture-Date/' + tail):
-                nddctr += 1                
-                logger('NO-DATE DUP  : ' + f + ' == ' + ToDir + '/No-Capture-Date/' + tail)
-            else:
-                ndactr += 1
-                logger('NO-DATE ADD  : ' + f + ' +> ' + ToDir + '/No-Capture-Date/' + tail)
-                subprocess.run(['cp', '-pn', f, ToDir + '/No-Capture-Date/'])     
+            scripto('cp -pnv ' + f + ' ' + ToDir + '/No-Capture-Date/')                          
+            logger('NO-DATE ADD  : ' + f + ' +> ' + ToDir + '/No-Capture-Date/' + tail)                    
 
 def print_stats():
 
@@ -179,51 +175,45 @@ def print_stats():
     logger('Source:      ' + FromDir)
     logger('Destination: ' + ToDir)
     logger('Logfile:     ' + logfile)
+    logger('cp script:   ' + copyscript)        
     logger(' ')    
     logger('All Files=' + str(allctr))    
-    logger('- Added=' + str(addctr))
-    logger('- Duplicates=' + str(dupctr) + ': Same-Date=' + str(dupdctr) + ' Same-File-Name=' + str(dupnctr))
-    logger('- No-Capture-Date=' + str(ndtctr) + ': Added=' + str(ndactr) + ' Same-File-Name=' + str(nddctr))
+    logger('- With-Capture-Date=' + str(addctr))
+    logger('- Without-Capture-Date=' + str(ndtctr))    
     logger('Ignored=' + str(ignctr))
 
     print (
         "\nSource:      " + FromDir
         ,"\nDestination: " + ToDir
         ,"\nLogfile:     " + logfile
+        ,"\ncp script:   " + copyscript        
         )    
     print (
         '\nAll Files=' + str(allctr)        
         ,'\nImage-Files=' + str(imgctr)        
-        ,'\n- Added=' + str(addctr)
-        ,'\n- Duplicates=' + str(dupctr) 
-        ,': Same-Date=' + str(dupdctr)
-        ,' Same-File-Name=' + str(dupnctr)
-        ,'\n- No-Capture-Date=' + str(ndtctr) 
-        ,': Added=' + str(ndactr)
-        ,' Same-File-Name=' + str(nddctr)
+        ,'\n- With-Capture-Date=' + str(addctr)
+        ,'\n- Without-Capture-Date=' + str(ndtctr) 
         ,'\nIgnored=' + str(ignctr)
         )   
 
-    if dupctr:
-        # there are duplicates that must be listed
-        logger(' ')      
-        logger('*** Warning - DUPLICATES FOUND!')     
-        logger('    please >>> grep ''DUP'' ' + logfile + ' <<< for duplicated files') 
-               
-        print ("\n*** Warning - DUPLICATES FOUND!"
-            ,"\n    please >>> grep 'DUP' " + logfile + " <<< for duplicated files")
-        
+    subprocess.run(['chmod 755 ' + copyscript], shell=True)
 
 def get_parms ():
 
     global FromDir, ToDir, ShowLog
     parser = argparse.ArgumentParser(
         description="Organize image files by capture date."
-        "\n  This utility retrieves all image files from [SOURCE] folder directory and it's sub-directories."
-        "\n  Image files are moved to [DESTINATION] folders based on image capture date and organized into YYYY/YYYY-MM-DD folders."
-        "\n  Duplicated files will not be moved to the new folders."
+        "\n  "
+        "\n  File utility to retrieve all image files from [SOURCE] directory and it's sub-directories."
+        "\n  Generate a shell script for copying files to destination folders based on image capture date."
+        "\n  Image files are organized into YYYY/YYYY-MM-DD folders."
         "\n  Files with no image capture date are stored in the folder [DESTINATION]/No-Capture-Date."
         "\n  The action done on each file is recorded in a logfile."
+        "\n  Note:" 
+        "\n  - The generated shell script (a kludge!) is intended to be executed within the NAS server, "
+        "\n    this will bypass date-stamp issues on 'cp -p' flag when copying files on a WD MyCloud "
+        "\n    EX2 Ultra NAS server from a MacOS Terminal."
+        "\n  - See previous version 'FileImage.py' which actually copies files to destination folders."             
         ,formatter_class=argparse.RawDescriptionHelpFormatter
         )
     parser.add_argument('SOURCE',type=str,help='Source folder of images')
@@ -243,6 +233,11 @@ def logger (action):
         print(action)
     subprocess.run(['echo "' + action +  '" >> ' + logfile], shell=True)
 
+def scripto (action):
+
+    global copyscript
+    subprocess.run(['echo "' + action +  '" >> ' + copyscript], shell=True)
+
 ##########################
 if __name__ == "__main__":
 
@@ -260,5 +255,5 @@ if __name__ == "__main__":
     logger('*** Done! ***')   
     logger(' ')
 
-    print('\nElapsed Time: ',elapsed)
+    print('\nElapsed Time: ', elapsed)
     print ('*** Done! ***\n') 
